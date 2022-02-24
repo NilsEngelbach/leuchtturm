@@ -143,10 +143,11 @@
       document
         .getElementById("leds")
         .addEventListener("change", function (event) {
-          if (event.target.value % 2 != 0) {
-            leds_per_strip = event.target.value;
+          const leds = parseInt(event.target.value);
+          if (leds % 2 != 0) {
+            leds_per_strip = leds;
           } else {
-            leds_per_strip = event.target.value + 1;
+            leds_per_strip = leds + 1;
           }
           total_leds = total_strips * leds_per_strip;
           initCanvas();

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leuchtturm</title>
+</head>
+<body>
+    <canvas id="canvas" width="80" height="50" style="width: 240px; height: auto; display: block;"></canvas>
+    <input type="range" id="rpm" name="Rounds per minute" min="1" max="240">
+    <input type="range" id="x" name="Distance modifier (X)" min="0" max="2000">
+    <input type="range" id="y" name="Distance modifier (Y)" min="0" max="2000">
+
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "gray";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const total_strips = 8;
+        const leds_per_strip = 5;
+        const total_leds = total_strips * leds_per_strip;
+
+        let rounds_per_minute = 45;
+        let round_time = 60000 / rounds_per_minute;
+
+        let x_distance_factor = 1.2; // Modify the intensity x distance
+        let y_distance_factor = 1; // Modify the intensity y distance
+
+        function loop() {
+            resetCanvas();
+            
+            var elapsed_milliseconds = getMillisecondsSinceStartOfLastSecond();
+            const elapsed_millisecond_in_round = Math.round(elapsed_milliseconds % round_time);
+
+            // between 0 and 1 current position in the circle
+            const position = (elapsed_millisecond_in_round / round_time).toFixed(3);
+            
+            const center_x = total_strips * position;
+            const center_y = Math.round((leds_per_strip / 2) - 1);
+            //drawLED(center_x, center_y, 1);
+            drawLEDS(center_x, center_y);
+
+            requestAnimationFrame(loop);
+        }
+
+        requestAnimationFrame(loop);
+
+        function getMillisecondsSinceStartOfLastSecond() {
+            const timestamp = new Date();
+            const date = new Date();
+            date.setMilliseconds(0);
+            date.setSeconds(0);
+            start_of_minute_timestamp = date;
+            return timestamp - start_of_minute_timestamp
+        }
+
+        function resetCanvas() {
+            ctx.fillStyle = "gray";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function drawLEDS(center_x, center_y) {
+            for (var strip = 0; strip < total_strips; strip++) {
+                for (var led = 0; led < leds_per_strip; led++) {
+                    const led_x = strip;
+                    const led_y = led;
+                    const distance_x = (getDistance(center_x, led_x, total_strips) * x_distance_factor).toFixed(5);
+                    const distance_y = (getDistance(center_y, led_y, leds_per_strip) * y_distance_factor).toFixed(5);
+
+                    let intensity = 1 - Math.hypot(distance_x, distance_y).toFixed(5);
+
+                    drawLED(led_x, led_y, intensity);
+                }
+            }
+        }
+
+        function drawLED(x, y, intensity = 1) {
+            ctx.beginPath();
+            ctx.arc(x * 10 + 5, y * 10 + 5, 3, 0, 2 * Math.PI, false);
+            ctx.fillStyle = `rgba(255, 255, 255, ${intensity})`;
+            ctx.fill();
+        }
+
+        function getDistance(a, b, total) {
+            const dist1 = Math.abs(a - b);
+            const dist2 = Math.abs((a+total) - b);
+            const dist3 = Math.abs((a-total) - b);
+            return Math.min(dist1, dist2, dist3) / (total / 2);
+        }
+
+        document.getElementById("rpm").value = rounds_per_minute;
+        document.getElementById("x").value = x_distance_factor * 1000;
+        document.getElementById("y").value = y_distance_factor * 1000;
+
+        document.getElementById("rpm").addEventListener('change', function (event) {
+            rounds_per_minute = event.target.value;
+            round_time = 60000 / rounds_per_minute;
+        });
+        document.getElementById("x").addEventListener('change', function (event) {
+            x_distance_factor = event.target.value / 1000;
+        });
+        document.getElementById("y").addEventListener('change', function (event) {
+            y_distance_factor = event.target.value / 1000;
+        });
+    </script>
+</body>
+</html>

@@ -43,9 +43,7 @@
         resetCanvas();
 
         var elapsed_milliseconds = getMillisecondsSinceStartOfLastSecond();
-        const elapsed_millisecond_in_round = Math.round(
-          elapsed_milliseconds % round_time
-        );
+        const elapsed_millisecond_in_round = Math.round(elapsed_milliseconds % round_time);
 
         // between 0 and 1 current position in the circle
         const position = (elapsed_millisecond_in_round / round_time).toFixed(3);
@@ -85,12 +83,8 @@
           for (var led = 0; led < leds_per_strip; led++) {
             const led_x = strip;
             const led_y = led;
-            const distance_x = (
-              getDistance(center_x, led_x, total_strips) * x_distance_factor
-            ).toFixed(5);
-            const distance_y = (
-              getDistance(center_y, led_y, leds_per_strip) * y_distance_factor
-            ).toFixed(5);
+            const distance_x = getDistance(center_x, led_x, total_strips) * x_distance_factor;
+            const distance_y = getDistance(center_y, led_y, leds_per_strip) * y_distance_factor;
 
             let intensity = 1 - Math.hypot(distance_x, distance_y).toFixed(5);
 
